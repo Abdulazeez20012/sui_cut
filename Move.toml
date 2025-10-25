@@ -2,12 +2,9 @@
 name = "SuiCut"
 version = "0.0.1"
 published-at = "0x0"
+edition = "2024"
 
 [dependencies]
-# Temporarily remove external dependencies to isolate build issues
-# ZkLogin = { git = "https://github.com/MystenLabs/zklogin.git", subdir = "contracts/zklogin", rev = "main" }
-# Walrus = { git = "https://github.com/MystenLabs/walrus.git", subdir = "contracts/walrus", rev = "main" }
-# Enoki = { git = "https://github.com/MystenLabs/enoki.git", subdir = "contracts/enoki", rev = "main" }
 
 [addresses]
 sui_cut = "0x0"

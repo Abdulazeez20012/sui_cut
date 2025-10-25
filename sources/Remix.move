@@ -1,21 +1,19 @@
-module sui_cut::Remix {
+module sui_cut::remix {
     use std::option::{Self, Option};
-    use sui::object::{Self, UID};
+    use sui::object::{Self, UID, ID};
     use sui::tx_context::{Self, TxContext};
     use sui::vec_map::{Self, VecMap};
-    use sui_cut::Video::{Self, Video};
-    // Add missing import for ID type
-    use sui::object::ID;
+    use sui_cut::video::{Self, Video};
 
     /// Tracks remix relationships between videos
-    struct RemixLineage has key {
+    public struct RemixLineage has key {
         id: UID,
         /// Maps video IDs to their parent video IDs
         remix_tree: VecMap<ID, ID>
     }
 
     /// Tracks which creators are associated with remixes for royalty purposes
-    struct RemixCreators has key {
+    public struct RemixCreators has key {
         id: UID,
         /// Maps video IDs to the original creator addresses
         creator_map: VecMap<ID, address>
@@ -46,16 +44,16 @@ module sui_cut::Remix {
         ctx: &mut TxContext
     ) {
         // Record the remix relationship
-        vec_map::insert(&mut lineage.remix_tree, new_video.id(), parent_video.id());
+        vec_map::insert(&mut lineage.remix_tree, object::id(&new_video.id), object::id(&parent_video.id));
         
         // Record the original creator for royalty purposes
-        vec_map::insert(&mut creators.creator_map, new_video.id(), Video::get_creator(parent_video));
+        vec_map::insert(&mut creators.creator_map, object::id(&new_video.id), video::get_creator(parent_video));
     }
 
     /// Get the parent video ID of a remix (if it exists)
     public fun get_parent_video(lineage: &RemixLineage, video_id: ID): Option<ID> {
-        if (vec_map::contains(&lineage.remix_tree, video_id)) {
-            option::some(*vec_map::get(&lineage.remix_tree, video_id))
+        if (vec_map::contains(&lineage.remix_tree, &video_id)) {
+            option::some(*vec_map::get(&lineage.remix_tree, &video_id))
         } else {
             option::none()
         }
@@ -63,8 +61,8 @@ module sui_cut::Remix {
 
     /// Get the original creator of a remix (if it exists)
     public fun get_original_creator(creators: &RemixCreators, video_id: ID): Option<address> {
-        if (vec_map::contains(&creators.creator_map, video_id)) {
-            option::some(*vec_map::get(&creators.creator_map, video_id))
+        if (vec_map::contains(&creators.creator_map, &video_id)) {
+            option::some(*vec_map::get(&creators.creator_map, &video_id))
         } else {
             option::none()
         }
@@ -75,8 +73,8 @@ module sui_cut::Remix {
         let mut lineage_trace = vector[];
         let mut current_id = video_id;
         
-        while (vec_map::contains(&lineage.remix_tree, current_id)) {
-            let parent_id = *vec_map::get(&lineage.remix_tree, current_id);
+        while (vec_map::contains(&lineage.remix_tree, &current_id)) {
+            let parent_id = *vec_map::get(&lineage.remix_tree, &current_id);
             lineage_trace.push_back(parent_id);
             current_id = parent_id;
         };

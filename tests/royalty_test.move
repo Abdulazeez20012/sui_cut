@@ -3,8 +3,9 @@ module sui_cut::royalty_test {
     use sui::test_scenario::{Self, Scenario};
     use sui::tx_context::{Self, TxContext};
     use sui::coin::{Self, Coin};
-    use sui_cut::Royalty::{Self, Royalty};
-    use sui_cut::Video::{Self, Video};
+    use sui_cut::royalty::{Self, Royalty};
+    use sui_cut::video::{Self, Video};
+    use sui::sui::SUI;
 
     #[test]
     fun test_calculate_royalty() {
@@ -12,7 +13,7 @@ module sui_cut::royalty_test {
         let bps = 1000; // 10%
         let expected_royalty = 1000; // 10% of 10000
         
-        let calculated_royalty = Royalty::calculate_royalty(amount, bps);
+        let calculated_royalty = royalty::calculate_royalty(amount, bps);
         assert!(calculated_royalty == expected_royalty, 0);
     }
 
@@ -22,7 +23,7 @@ module sui_cut::royalty_test {
         let bps = 0; // 0%
         let expected_royalty = 0; // 0% of 10000
         
-        let calculated_royalty = Royalty::calculate_royalty(amount, bps);
+        let calculated_royalty = royalty::calculate_royalty(amount, bps);
         assert!(calculated_royalty == expected_royalty, 0);
     }
 
@@ -32,7 +33,7 @@ module sui_cut::royalty_test {
         let bps = 5000; // 50%
         let expected_royalty = 5000; // 50% of 10000
         
-        let calculated_royalty = Royalty::calculate_royalty(amount, bps);
+        let calculated_royalty = royalty::calculate_royalty(amount, bps);
         assert!(calculated_royalty == expected_royalty, 0);
     }
 
@@ -41,7 +42,7 @@ module sui_cut::royalty_test {
         let bps = 1000; // 1000 basis points
         let expected_percentage = 10; // 10%
         
-        let percentage = Royalty::get_royalty_percentage(bps);
+        let percentage = royalty::get_royalty_percentage(bps);
         assert!(percentage == expected_percentage, 0);
     }
 }

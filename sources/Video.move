@@ -1,15 +1,14 @@
-module sui_cut::Video {
+module sui_cut::video {
     use std::option::{Self, Option};
     use sui::object::{Self, UID};
     use sui::tx_context::{Self, TxContext};
-    // Add missing transfer module
-    use sui::transfer;
+    use sui::transfer::{Self, public_transfer};
 
     /// Maximum royalty percentage (50% in basis points)
     const MAX_ROYALTY_BPS: u64 = 5000;
 
     /// Video object representing a video on the platform
-    struct Video has key {
+    public struct Video has key, store {
         id: UID,
         /// Address of the creator
         creator: address,
@@ -31,7 +30,7 @@ module sui_cut::Video {
         royalty_bps: u64,
         ctx: &mut TxContext
     ): Video {
-        assert!(royalty_bps <= MAX_ROYALTY_BPS, EInvalidRoyalty);
+        assert!(royalty_bps <= MAX_ROYALTY_BPS, 0);
         Video {
             id: object::new(ctx),
             creator,
@@ -51,7 +50,7 @@ module sui_cut::Video {
         original_creator: address,
         ctx: &mut TxContext
     ): Video {
-        assert!(royalty_bps <= MAX_ROYALTY_BPS, EInvalidRoyalty);
+        assert!(royalty_bps <= MAX_ROYALTY_BPS, 0);
         Video {
             id: object::new(ctx),
             creator,
@@ -69,24 +68,15 @@ module sui_cut::Video {
         new_cid: vector<u8>,
         new_royalty_bps: u64
     ) {
-        assert!(new_royalty_bps <= MAX_ROYALTY_BPS, EInvalidRoyalty);
+        assert!(new_royalty_bps <= MAX_ROYALTY_BPS, 0);
         video.title = new_title;
         video.walrus_cid = new_cid;
         video.royalty_bps = new_royalty_bps;
     }
 
     /// Transfer video ownership to another address
-    public entry fun transfer_video(video: Video, recipient: address, ctx: &mut TxContext) {
-        let Video { id, creator: _, walrus_cid, title, royalty_bps, remix_origin } = video;
-        let new_video = Video {
-            id,
-            creator: recipient,
-            walrus_cid,
-            title,
-            royalty_bps,
-            remix_origin
-        };
-        transfer::public_transfer(new_video, recipient, ctx);
+    public entry fun transfer_video(video: Video, recipient: address) {
+        public_transfer(video, recipient);
     }
 
     /// Delete a video object
@@ -121,10 +111,7 @@ module sui_cut::Video {
     }
 
     /// Get the ID of the video
-    public fun id(video: &Video): UID {
-        video.id
+    public fun id(video: &Video): &UID {
+        &video.id
     }
-
-    // Error codes
-    const EInvalidRoyalty: u64 = 0;
 }
